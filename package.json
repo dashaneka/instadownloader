@@ -1,0 +1,21 @@
+{
+  "name": "instadownloader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mrnima/instagram-downloader": "^1.0.0",
+    "@sasmeee/igdl": "^0.0.1-security",
+    "axios": "^1.16.1",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

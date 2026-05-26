@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>InstaSave | Instagram Downloader</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg:#0f1115;
+    --surface:#181c22;
+
+    --accent:#fcb07e;
+    --blue:#3581b8;
+
+    --text:#ebe9e9;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+
+    background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+
+    background-size:50px 50px;
+
+    mask-image:radial-gradient(circle at center, black 20%, transparent 80%);
+    pointer-events:none;
+}
+
+/* ambient glows */
+
+.glow-orange{
+    position:fixed;
+    width:700px;
+    height:700px;
+    border-radius:50%;
+    background:var(--accent);
+    opacity:.08;
+    filter:blur(120px);
+
+    top:-250px;
+    right:-250px;
+}
+
+.glow-blue{
+    position:fixed;
+    width:700px;
+    height:700px;
+    border-radius:50%;
+    background:var(--blue);
+    opacity:.08;
+    filter:blur(120px);
+
+    bottom:-250px;
+    left:-250px;
+}
+
+.container{
+    width:min(1100px,90%);
+    margin:auto;
+}
+
+.hero{
+    min-height:100vh;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
+    z-index:2;
+}
+
+.hero-content{
+    width:100%;
+    text-align:center;
+}
+
+.badge{
+    display:inline-block;
+
+    padding:12px 20px;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    color:var(--accent);
+
+    margin-bottom:25px;
+
+    font-weight:600;
+}
+
+h1{
+    font-size:clamp(3.5rem,10vw,7rem);
+
+    line-height:.95;
+
+    letter-spacing:-4px;
+
+    font-weight:900;
+
+    background:linear-gradient(
+    180deg,
+    #ffffff,
+    #bcc4cf
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.highlight{
+    background:linear-gradient(
+    135deg,
+    #fcb07e,
+    #ffd2b5
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.subtitle{
+    max-width:700px;
+
+    margin:25px auto 50px;
+
+    color:rgba(235,233,233,.7);
+
+    line-height:1.8;
+
+    font-size:1.1rem;
+}
+
+/* downloader card */
+
+.downloader-card{
+
+    max-width:850px;
+
+    margin:auto;
+
+    padding:35px;
+
+    border-radius:30px;
+
+    background:rgba(255,255,255,.03);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    backdrop-filter:blur(20px);
+
+    box-shadow:
+    0 10px 40px rgba(0,0,0,.35);
+}
+
+.input-wrapper{
+
+    display:flex;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+}
+
+.input-wrapper input{
+
+    flex:1;
+
+    min-width:250px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    color:white;
+
+    padding:18px 20px;
+
+    border-radius:16px;
+
+    outline:none;
+
+    font-size:1rem;
+}
+
+.input-wrapper input::placeholder{
+    color:rgba(255,255,255,.4);
+}
+
+.download-btn{
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:18px 28px;
+
+    border-radius:16px;
+
+    font-weight:700;
+
+    color:#111;
+
+    background:linear-gradient(
+    135deg,
+    #fcb07e,
+    #ff9966
+    );
+
+    box-shadow:
+    0 10px 30px rgba(252,176,126,.25);
+
+    transition:.3s;
+}
+
+.download-btn:hover{
+    transform:translateY(-3px);
+}
+
+.features{
+
+    margin-top:90px;
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(250px,1fr));
+
+    gap:24px;
+}
+
+.feature{
+
+    padding:30px;
+
+    border-radius:24px;
+
+    background:rgba(255,255,255,.03);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    backdrop-filter:blur(12px);
+
+    transition:.3s;
+}
+
+.feature:hover{
+    transform:translateY(-6px);
+}
+
+.icon{
+
+    width:60px;
+    height:60px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:16px;
+
+    margin-bottom:18px;
+
+    background:rgba(252,176,126,.12);
+
+    font-size:1.4rem;
+}
+
+.feature h3{
+    margin-bottom:12px;
+}
+
+.feature p{
+    color:rgba(235,233,233,.65);
+    line-height:1.7;
+}
+
+footer{
+
+    text-align:center;
+
+    padding:60px 20px;
+
+    color:rgba(235,233,233,.5);
+}
+
+@media(max-width:768px){
+
+    .input-wrapper{
+        flex-direction:column;
+    }
+
+    h1{
+        letter-spacing:-2px;
+    }
+
+    .downloader-card{
+        padding:24px;
+    }
+}
+
+/* Settings Wrapper */
+.settings-wrapper {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-wrap: wrap;
+}
+
+.settings-wrapper select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.settings-wrapper select:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+}
+
+/* Loading container */
+.loading-container {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3.5px solid rgba(252, 176, 126, 0.15);
+    border-top: 3.5px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+/* Error Container */
+.error-container {
+    margin-top: 30px;
+    background: rgba(239, 83, 80, 0.06);
+    border: 1px solid rgba(239, 83, 80, 0.25);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+}
+
+.error-icon {
+    font-size: 1.5rem;
+}
+
+.error-text {
+    font-size: 0.95rem;
+    color: #ff8a80;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Results Container */
+.results-container {
+    margin-top: 35px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 30px;
+    text-align: left;
+}
+
+.post-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.media-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: 0.3s;
+}
+
+.media-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(252, 176, 126, 0.3);
+}
+
+.media-preview-container {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    background: #0b0c10;
+}
+
+.media-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.media-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.media-badge.video {
+    color: #ffc107;
+}
+
+.media-badge.image {
+    color: #2196f3;
+}
+
+.media-card-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.btn-download-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #111;
+    background: var(--accent);
+    transition: 0.2s;
+    text-decoration: none;
+}
+
+.btn-download-item:hover {
+    filter: brightness(1.1);
+}
+
+</style>
+</head>
+<body>
+
+<div class="glow-orange"></div>
+<div class="glow-blue"></div>
+
+<section class="hero">
+
+<div class="container">
+
+<div class="hero-content">
+
+<div class="badge">
+✦ instagram reels • photos • videos
+</div>
+
+<h1>
+INSTA
+<span class="highlight">SAVE</span>
+</h1>
+
+<p class="subtitle">
+download instagram reels, videos, stories, photos, and carousel posts instantly with a clean and premium experience.
+</p>
+
+<div class="downloader-card">
+
+<div class="input-wrapper">
+
+<input
+type="text"
+id="url-input"
+placeholder="Paste Instagram URL here..."
+>
+
+<button class="download-btn" id="download-btn">
+Download
+</button>
+
+</div>
+
+<div class="settings-wrapper">
+<label for="cookies-select">Use Browser Session (Optional, for private accounts):</label>
+<select id="cookies-select">
+<option value="none">None (Public Post Scraper)</option>
+<option value="brave">Brave Browser (Flatpak)</option>
+<option value="chrome">Google Chrome</option>
+<option value="firefox">Firefox</option>
+</select>
+</div>
+
+<!-- Loading Container -->
+<div class="loading-container" id="loading-container" style="display: none;">
+<div class="spinner"></div>
+<p>Analyzing post and grabbing media links...</p>
+</div>
+
+<!-- Error Container -->
+<div class="error-container" id="error-container" style="display: none;">
+<span class="error-icon">⚠️</span>
+<p class="error-text" id="error-text">Failed to retrieve downloader info.</p>
+</div>
+
+<!-- Results Container -->
+<div class="results-container" id="results-container" style="display: none;">
+<h3 class="post-title" id="post-title">Instagram Post</h3>
+<div class="media-grid" id="media-grid"></div>
+</div>
+
+</div>
+
+<div class="features">
+
+<div class="feature">
+<div class="icon">⚡</div>
+<h3>Fast Downloads</h3>
+<p>
+Get your content instantly with a simple one-click experience.
+</p>
+</div>
+
+<div class="feature">
+<div class="icon">🎥</div>
+<h3>HD Quality</h3>
+<p>
+Designed to showcase high-quality video and image downloads.
+</p>
+</div>
+
+<div class="feature">
+<div class="icon">🔒</div>
+<h3>Private & Secure</h3>
+<p>
+Minimal design focused on privacy, simplicity, and user trust.
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<footer>
+© 2026 InstaSave • Premium Instagram Downloader UI
+</footer>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const urlInput = document.getElementById('url-input');
+    const downloadBtn = document.getElementById('download-btn');
+    const cookiesSelect = document.getElementById('cookies-select');
+    
+    const loadingContainer = document.getElementById('loading-container');
+    const errorContainer = document.getElementById('error-container');
+    const errorText = document.getElementById('error-text');
+    const resultsContainer = document.getElementById('results-container');
+    const postTitle = document.getElementById('post-title');
+    const mediaGrid = document.getElementById('media-grid');
+
+    downloadBtn.addEventListener('click', handleDownload);
+    urlInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleDownload();
+        }
+    });
+
+    async function handleDownload() {
+        const url = urlInput.value.trim();
+        const cookiesFrom = cookiesSelect.value;
+
+        if (!url) {
+            showError('Please paste an Instagram URL first.');
+            return;
+        }
+
+        if (!url.match(/^https?:\/\/(www\.)?instagram\.com\/.+/i)) {
+            showError('Please enter a valid Instagram URL (e.g., https://www.instagram.com/reel/...)');
+            return;
+        }
+
+        // Reset states
+        hideError();
+        hideResults();
+        showLoading();
+        
+        // Disable UI
+        urlInput.disabled = true;
+        downloadBtn.disabled = true;
+        cookiesSelect.disabled = true;
+        downloadBtn.style.opacity = '0.6';
+        downloadBtn.style.cursor = 'not-allowed';
+
+        try {
+            const apiRes = await fetch(`/api/download-info?url=${encodeURIComponent(url)}&cookiesFrom=${cookiesFrom}`);
+            const data = await apiRes.json();
+
+            if (!apiRes.ok || !data.success) {
+                throw new Error(data.error || 'Failed to extract download link.');
+            }
+
+            renderResults(data.data);
+        } catch (error) {
+            console.error('Error fetching media:', error);
+            showError(error.message || 'An unexpected error occurred. Please try again.');
+        } finally {
+            hideLoading();
+            urlInput.disabled = false;
+            downloadBtn.disabled = false;
+            cookiesSelect.disabled = false;
+            downloadBtn.style.opacity = '1';
+            downloadBtn.style.cursor = 'pointer';
+        }
+    }
+
+    function showLoading() {
+        loadingContainer.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        loadingContainer.style.display = 'none';
+    }
+
+    function showError(message) {
+        errorText.innerText = message;
+        errorContainer.style.display = 'flex';
+    }
+
+    function hideError() {
+        errorContainer.style.display = 'none';
+    }
+
+    function showResults() {
+        resultsContainer.style.display = 'block';
+    }
+
+    function hideResults() {
+        resultsContainer.style.display = 'none';
+        mediaGrid.innerHTML = '';
+    }
+
+    function renderResults(postData) {
+        postTitle.innerText = postData.title || 'Instagram Media';
+        mediaGrid.innerHTML = '';
+
+        if (!postData.media || postData.media.length === 0) {
+            showError('No media files found for this post URL.');
+            return;
+        }
+
+        postData.media.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'media-card';
+
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'media-preview-container';
+
+            const img = document.createElement('img');
+            img.className = 'media-preview';
+            img.loading = 'lazy';
+            img.src = item.thumbnail || 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&auto=format&fit=crop';
+            previewContainer.appendChild(img);
+
+            const badge = document.createElement('div');
+            badge.className = `media-badge ${item.type}`;
+            badge.innerText = item.type;
+            previewContainer.appendChild(badge);
+
+            card.appendChild(previewContainer);
+
+            const info = document.createElement('div');
+            info.className = 'media-card-info';
+
+            const dlBtn = document.createElement('a');
+            dlBtn.className = 'btn-download-item';
+            
+            // Link to download proxy endpoint
+            const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(item.url)}&filename=${item.filename}`;
+            dlBtn.href = proxyUrl;
+            dlBtn.target = '_self';
+            
+            dlBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download ${item.type === 'video' ? 'Video' : 'Image'}
+            `;
+            info.appendChild(dlBtn);
+            card.appendChild(info);
+
+            mediaGrid.appendChild(card);
+        });
+
+        showResults();
+    }
+});
+</script>
+</body>
+</html>
